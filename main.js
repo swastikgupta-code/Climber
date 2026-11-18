@@ -19,6 +19,7 @@ async function init()
     ]);
     const vertexModule = device.createShaderModule({code: vertex_code});
     const fragmentModule = device.createShaderModule({code: fragment_code});
+    const aspect = canvas.width/canvas.height;
     const pipeline = device.createRenderPipeline({
         layout: "auto",
         vertex: {
@@ -34,6 +35,20 @@ async function init()
             topology: "triangle-list"
         }
     });
+    const uniformBuffer = device.createBuffer({
+        size: 16,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    });
+    const bindGroup = device.createBindGroup({
+        layout: pipeline.getBindGroupLayout(0),
+        entries: [
+            {
+                binding: 0,
+                resource: {buffer: uniformBuffer}
+            }
+        ]
+    });
+    device.queue.writeBuffer(uniformBuffer,0,new Float32Array([aspect]));
     const commandEncoder = device.createCommandEncoder();
     const TextureView = context.getCurrentTexture().createView();
     const renderpass = {
@@ -48,6 +63,7 @@ async function init()
     };
     const passEncoder = commandEncoder.beginRenderPass(renderpass);
     passEncoder.setPipeline(pipeline);
+    passEncoder.setBindGroup(0,bindGroup);
     passEncoder.draw(6);
     passEncoder.end();
     device.queue.submit([commandEncoder.finish()]);
