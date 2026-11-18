@@ -19,7 +19,6 @@ async function init()
     ]);
     const vertexModule = device.createShaderModule({code: vertex_code});
     const fragmentModule = device.createShaderModule({code: fragment_code});
-    const aspect = canvas.width/canvas.height;
     const pipeline = device.createRenderPipeline({
         layout: "auto",
         vertex: {
@@ -48,7 +47,18 @@ async function init()
             }
         ]
     });
-    device.queue.writeBuffer(uniformBuffer,0,new Float32Array([aspect]));
+}
+async function render(time)
+{
+    const canvas = document.getElementById("gpu_canvas");
+    const adapter = await navigator.gpu.requestAdapter();
+    const device = await adapter.requestDevice();
+    const context = canvas.getContext("webgpu");
+    const aspect = canvas.width/canvas.height;
+    var data = new Float32Array();
+    data[0] = aspect;
+    data[1] = time * 0.001;
+    device.queue.writeBuffer(uniformBuffer,0,data);
     const commandEncoder = device.createCommandEncoder();
     const TextureView = context.getCurrentTexture().createView();
     const renderpass = {
@@ -69,3 +79,4 @@ async function init()
     device.queue.submit([commandEncoder.finish()]);
 }
 init();
+requestAnimationFrame(render);
