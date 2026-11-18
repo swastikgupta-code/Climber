@@ -48,7 +48,7 @@ async function init()
     };
     const passEncoder = commandEncoder.beginRenderPass(renderpass);
     passEncoder.setPipeline(pipeline);
-    passEncoder.draw(3);
+    passEncoder.draw(6);
     passEncoder.end();
     device.queue.submit([commandEncoder.finish()]);
 }

@@ -6,11 +6,14 @@ struct VertexOutput
 @vertex
 fn vertex_main(@builtin(vertex_index) index: u32) -> VertexOutput
 {
-    var pos = array<vec2f,3> 
+    var pos = array<vec2f,6> 
     (
         vec2f(-1.0,-1.0),
         vec2f(-1.0,1.0),
-        vec2f(1.0,1.0)
+        vec2f(1.0,1.0),
+        vec2f(1.0,1.0),
+        vec2f(-1.0,-1.0),
+        vec2f(1.0,-1.0)
     );
     var output: VertexOutput;
     output.uv = pos[index];
