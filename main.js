@@ -13,6 +13,27 @@ async function init()
         format: navigator.gpu.getPreferredCanvasFormat(),
         alphaMode: "opaque"
     });
+    const [vertex_code,fragment_code] = await Promise.all([
+        fetch("./vertex.wgsl").then((res)=>res.text()),
+        fetch("./fragment.wgsl").then((res)=>res.text())
+    ]);
+    const vertexModule = device.createShaderModule({code: vertex_code});
+    const fragmentModule = device.createShaderModule({code: fragment_code});
+    const pipeline = device.createRenderPipeline({
+        layout: "auto",
+        vertex: {
+            module: vertexModule,
+            entryPoint: "vertex_main"
+        },
+        fragment: {
+            module: fragmentModule,
+            entryPoint: "fragment_main",
+            targets: [{format: navigator.gpu.getPreferredCanvasFormat()}]
+        },
+        primitive: {
+            topology: "triangle-list"
+        }
+    });
     const commandEncoder = device.createCommandEncoder();
     const TextureView = context.getCurrentTexture().createView();
     const renderpass = {
@@ -26,7 +47,8 @@ async function init()
         ]
     };
     const passEncoder = commandEncoder.beginRenderPass(renderpass);
-    
+    passEncoder.setPipeline(pipeline);
+    passEncoder.draw(3);
     passEncoder.end();
     device.queue.submit([commandEncoder.finish()]);
 }
