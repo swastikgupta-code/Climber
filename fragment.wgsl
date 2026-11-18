@@ -7,7 +7,9 @@ struct VertexOutput
 @fragment
 fn fragment_main(input: VertexOutput) -> @location(0) vec4f
 {
-    var dis = length(vec2f(input.uv.x*aspect,input.uv.y));
+    var speed : vec2f = vec2f(0.2,0.0);
+    var cen : vec2f = vec2f(0.0,0.0)+speed;
+    var dis = length(vec2f(input.uv.x*aspect,input.uv.y)-cen);
     var col : vec4f = vec4f();
     if(dis<0.5)
     {
