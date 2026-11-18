@@ -1,13 +1,15 @@
+let device,context,pipeline,uniformBuffer,bindGroup;
+var data = new Float32Array(2);
 async function init()
 {
     const canvas = document.getElementById("gpu_canvas");
     if(!navigator.gpu) throw new Error("WebGPU is not supported");
     const adapter = await navigator.gpu.requestAdapter();
     if(!adapter) throw new Error("Adapter not found");
-    const device = await adapter.requestDevice();
+    device = await adapter.requestDevice();
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const context = canvas.getContext("webgpu");
+    context = canvas.getContext("webgpu");
     context.configure({
         device: device,
         format: navigator.gpu.getPreferredCanvasFormat(),
@@ -19,7 +21,7 @@ async function init()
     ]);
     const vertexModule = device.createShaderModule({code: vertex_code});
     const fragmentModule = device.createShaderModule({code: fragment_code});
-    const pipeline = device.createRenderPipeline({
+    pipeline = device.createRenderPipeline({
         layout: "auto",
         vertex: {
             module: vertexModule,
@@ -34,11 +36,11 @@ async function init()
             topology: "triangle-list"
         }
     });
-    const uniformBuffer = device.createBuffer({
+    uniformBuffer = device.createBuffer({
         size: 16,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
     });
-    const bindGroup = device.createBindGroup({
+    bindGroup = device.createBindGroup({
         layout: pipeline.getBindGroupLayout(0),
         entries: [
             {
@@ -47,15 +49,12 @@ async function init()
             }
         ]
     });
+    requestAnimationFrame(render);
 }
-async function render(time)
+function render(time)
 {
-    const canvas = document.getElementById("gpu_canvas");
-    const adapter = await navigator.gpu.requestAdapter();
-    const device = await adapter.requestDevice();
-    const context = canvas.getContext("webgpu");
+    const canvas = context.canvas;
     const aspect = canvas.width/canvas.height;
-    var data = new Float32Array();
     data[0] = aspect;
     data[1] = time * 0.001;
     device.queue.writeBuffer(uniformBuffer,0,data);
@@ -77,6 +76,6 @@ async function render(time)
     passEncoder.draw(6);
     passEncoder.end();
     device.queue.submit([commandEncoder.finish()]);
+    requestAnimationFrame(render);
 }
 init();
-requestAnimationFrame(render);
