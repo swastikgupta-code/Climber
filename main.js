@@ -5,7 +5,8 @@ async function init()
     const adapter = await navigator.gpu.requestAdapter();
     if(!adapter) throw new Error("Adapter not found");
     const device = await adapter.requestDevice();
-    
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     const context = canvas.getContext("webgpu");
     context.configure({
         device: device,
@@ -25,6 +26,7 @@ async function init()
         ]
     };
     const passEncoder = commandEncoder.beginRenderPass(renderpass);
+    
     passEncoder.end();
     device.queue.submit([commandEncoder.finish()]);
 }
