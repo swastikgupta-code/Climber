@@ -1,5 +1,7 @@
 let device,context,pipeline,uniformBuffer,bindGroup;
-var data = new Float32Array(2);
+var data = new Float32Array(4);
+var speed = [0.2,0.0];
+var keysPressed = [];
 async function init()
 {
     const canvas = document.getElementById("gpu_canvas");
@@ -55,8 +57,11 @@ function render(time)
 {
     const canvas = context.canvas;
     const aspect = canvas.width/canvas.height;
+    physics(time);
     data[0] = aspect;
     data[1] = time * 0.001;
+    data[2] = speed[0];
+    data[3] = speed[1];
     device.queue.writeBuffer(uniformBuffer,0,data);
     const commandEncoder = device.createCommandEncoder();
     const TextureView = context.getCurrentTexture().createView();
@@ -78,4 +83,21 @@ function render(time)
     device.queue.submit([commandEncoder.finish()]);
     requestAnimationFrame(render);
 }
+function physics(time)
+{
+    if(keysPressed.includes(87))
+        speed[1] += 1;
+    else if(keysPressed.includes(83))
+        speed[1] -= 1;
+    if(keysPressed.includes(65))
+        speed[0] -= 1;
+    else if(keysPressed.includes(68))
+        speed[0] += 1;
+    speed[0] = speed[0] /Math.sqrt(speed[0]**2 + speed[1]**2) * 0.2;
+    speed[1] = speed[1] /Math.sqrt(speed[0]**2 + speed[1]**2) * 0.2;
+    keysPressed = [];
+}
+window.addEventListener('keydown',(event) => {
+    keysPressed.add(event.code);
+});
 init();
