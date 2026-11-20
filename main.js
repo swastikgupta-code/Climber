@@ -1,7 +1,7 @@
 let device,context,pipeline,uniformBuffer,bindGroup;
 var data = new Float32Array(4);
 var speed = [0.2,0.0];
-var keysPressed = [];
+var keysPressed = new Set();
 async function init()
 {
     const canvas = document.getElementById("gpu_canvas");
@@ -85,17 +85,20 @@ function render(time)
 }
 function physics(time)
 {
-    if(keysPressed.includes(87))
+    if(keysPressed.has("KeyW"))
         speed[1] += 1;
-    else if(keysPressed.includes(83))
+    else if(keysPressed.has("KeyS"))
         speed[1] -= 1;
-    if(keysPressed.includes(65))
+    if(keysPressed.has("KeyA"))
         speed[0] -= 1;
-    else if(keysPressed.includes(68))
+    else if(keysPressed.has("KeyD"))
         speed[0] += 1;
-    speed[0] = speed[0] /Math.sqrt(speed[0]**2 + speed[1]**2) * 0.2;
-    speed[1] = speed[1] /Math.sqrt(speed[0]**2 + speed[1]**2) * 0.2;
-    keysPressed = [];
+    keysPressed = new Set();
+    let mag = Math.sqrt(speed[0]**2 + speed[1]**2)
+    if(mag<0.001)
+        return;
+    speed[0] = speed[0] /mag * 0.2;
+    speed[1] = speed[1] /mag * 0.2;
 }
 window.addEventListener('keydown',(event) => {
     keysPressed.add(event.code);
