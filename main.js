@@ -1,5 +1,7 @@
-let device,context,pipeline,uniformBuffer,bindGroup,player,lastTime=0,collider;
-var data = new Float32Array(16);
+let device,context,pipeline,uniformBuffer,bindGroup,player,lastTime=0;
+let gravity = 0.2;
+let colliders = [];
+var data = new Float32Array(32);
 var keysPressed = new Set();
 class Vector
 {
@@ -113,7 +115,7 @@ async function init()
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     player = new Player();
-    collider = new rectangle_collider(-0.3,-0.3,0.6,0.2);
+    create_environment();
     context = canvas.getContext("webgpu");
     context.configure({
         device: device,
@@ -163,14 +165,20 @@ function render(time)
     const canvas = context.canvas;
     const aspect = canvas.width/canvas.height;
     player.move(delta_time);
-    collider.move(delta_time);
+    colliders.forEach((collider)=>{
+        collider.move(delta_time);
+    });
     data[0] = aspect;
     data[1] = delta_time;
     data[2] = player.dir.mul(player.speed).x;
     data[3] = player.dir.mul(player.speed).y;
     data[4] = player.pos.x;
     data[5] = player.pos.y;
-    data.set(collider.array(),6);
+    data[6] = 0.0;
+    data[7] = 0.0;
+    colliders.forEach((collider,index)=>{
+        data.set(collider.array(),8+index*4);
+    });
     device.queue.writeBuffer(uniformBuffer,0,data);
     const commandEncoder = device.createCommandEncoder();
     const TextureView = context.getCurrentTexture().createView();
@@ -208,39 +216,47 @@ function physics(time)
     else if(keysPressed.has("KeyD"))
         player.dir = player.dir.add(right);
     player.dir.normalize();
-    if(collider.is_colliding(player.pos))
-    {
-        let overlap_left = player.pos.x - collider.pos.x;
-        let overlap_right = (collider.pos.x+collider.width) - player.pos.x;
-        let overlap_down = player.pos.y - collider.pos.y;
-        let overlap_up = (collider.pos.y+collider.height) - player.pos.y;
-        let min_overlap_x = Math.min(overlap_left,overlap_right);
-        let min_overlap_y = Math.min(overlap_up,overlap_down);
-        if(min_overlap_x < min_overlap_y)
+    colliders.forEach((collider)=>{
+        if(collider.is_colliding(player.pos))
         {
-            if(overlap_left<overlap_right)
+            let overlap_left = player.pos.x - collider.pos.x;
+            let overlap_right = (collider.pos.x+collider.width) - player.pos.x;
+            let overlap_down = player.pos.y - collider.pos.y;
+            let overlap_up = (collider.pos.y+collider.height) - player.pos.y;
+            let min_overlap_x = Math.min(overlap_left,overlap_right);
+            let min_overlap_y = Math.min(overlap_up,overlap_down);
+            if(min_overlap_x < min_overlap_y)
             {
-                player.pos.x = collider.pos.x - gap;
+                if(overlap_left<overlap_right)
+                {
+                    player.pos.x = collider.pos.x - gap;
+                }
+                else
+                {
+                    player.pos.x = collider.pos.x + collider.width + gap;
+                }
+                player.dir.x *= -1;
             }
             else
             {
-                player.pos.x = collider.pos.x + collider.width + gap;
+                if(overlap_down<overlap_up)
+                {
+                    player.pos.y = collider.pos.y - gap;
+                }
+                else
+                {
+                    player.pos.y = collider.pos.y + collider.height + gap;
+                }
+                player.dir.y *= -1;
             }
-            player.dir.x *= -1;
         }
-        else
-        {
-            if(overlap_down<overlap_up)
-            {
-                player.pos.y = collider.pos.y - gap;
-            }
-            else
-            {
-                player.pos.y = collider.pos.y + collider.height + gap;
-            }
-            player.dir.y *= -1;
-        }
-    }
+    });
+}
+function create_environment()
+{
+    colliders.push(new rectangle_collider(-1.8,-1.1,3.6,0.2));
+    colliders.push(new rectangle_collider(-1.8,-0.2,0.9,0.2));
+    colliders.push(new rectangle_collider(0.6,-0.6,1.2,0.2));
 }
 window.addEventListener('keydown',(event) => {
     keysPressed.add(event.code);
