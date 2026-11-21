@@ -1,6 +1,5 @@
-let device,context,pipeline,uniformBuffer,bindGroup,player;
-var data = new Float32Array(4);
-var speed = [0.2,0.0];
+let device,context,pipeline,uniformBuffer,bindGroup,player,lastTime=0;
+var data = new Float32Array(8);
 var keysPressed = new Set();
 class Vector
 {
@@ -37,10 +36,26 @@ class Vector
     {
         return new Vector(this.y*v.z-this.z*v.y,this.z*v.x-this.x*v.z,this.x*v.y-this.y*v.x);
     }
+    normalize()
+    {
+        if(this.len()<0.0001)
+        {
+            this.x = 0;
+            this.y = 0;
+            this.z = 0;
+        }
+        else
+        {
+            let len = this.len();
+            this.x = this.x/len;
+            this.y = this.y/len;
+            this.z = this.z/len;
+        }
+    }
 }
 class Player
 {
-    constructor(pos=new Vector(0,0,0),speed=0.2,dir=new Vector(0,0,0))
+    constructor(pos=new Vector(0,0,0),speed=0.2,dir=new Vector(1,0,0))
     {
         this.pos = pos;
         this.speed = speed;
@@ -89,7 +104,7 @@ async function init()
         }
     });
     uniformBuffer = device.createBuffer({
-        size: 24,
+        size: data.byteLength,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
     });
     bindGroup = device.createBindGroup({
@@ -105,13 +120,18 @@ async function init()
 }
 function render(time)
 {
+    time /= 1000;
+    let delta_time = time-lastTime;
     const canvas = context.canvas;
     const aspect = canvas.width/canvas.height;
-    physics(time);
+    physics(delta_time);
+    player.move(delta_time);
     data[0] = aspect;
-    data[1] = time * 0.001;
-    data[2] = speed[0];
-    data[3] = speed[1];
+    data[1] = delta_time * 0.001;
+    data[2] = player.dir.mul(player.speed).x;
+    data[3] = player.dir.mul(player.speed).y;
+    data[4] = player.pos.x;
+    data[5] = player.pos.y;
     device.queue.writeBuffer(uniformBuffer,0,data);
     const commandEncoder = device.createCommandEncoder();
     const TextureView = context.getCurrentTexture().createView();
@@ -131,24 +151,23 @@ function render(time)
     passEncoder.draw(6);
     passEncoder.end();
     device.queue.submit([commandEncoder.finish()]);
+    lastTime = time;
     requestAnimationFrame(render);
 }
 function physics(time)
 {
+    let right = new Vector(1,0);
+    let up = new Vector(0,1);
     if(keysPressed.has("KeyW"))
-        speed[1] += 1;
+        player.dir = player.dir.add(right);
     else if(keysPressed.has("KeyS"))
-        speed[1] -= 1;
+        player.dir = player.dir.sub(right);
     if(keysPressed.has("KeyA"))
-        speed[0] -= 1;
+        player.dir = player.dir.sub(up);
     else if(keysPressed.has("KeyD"))
-        speed[0] += 1;
+        player.dir = player.dir.add(up);;
     keysPressed = new Set();
-    let mag = Math.sqrt(speed[0]**2 + speed[1]**2)
-    if(mag<0.001)
-        return;
-    speed[0] = speed[0] /mag * 0.2;
-    speed[1] = speed[1] /mag * 0.2;
+    player.dir.normalize();
 }
 window.addEventListener('keydown',(event) => {
     keysPressed.add(event.code);
