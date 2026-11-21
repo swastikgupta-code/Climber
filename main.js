@@ -53,7 +53,7 @@ class Vector
         }
     }
 }
-class Player
+class Entity
 {
     constructor(pos=new Vector(0,0,0),speed=0.4,dir=new Vector(1,0,0))
     {
@@ -66,39 +66,38 @@ class Player
         this.pos = this.pos.add(this.dir.mul(this.speed*time));
     }
 }
-class rectangle_collider
+class Player extends Entity
+{
+    constructor(pos=new Vector(0,0,0),speed=0.4,dir=new Vector(1,0,0))
+    {
+        super(pos,speed,dir);
+    }
+}
+class rectangle_collider extends Entity
 {
     constructor(x,y,width,height,speed=0.4,dir=new Vector(0,0,0))
     {
-        this.x = x;
-        this.y = y;
+        super(new Vector(x,y),speed,dir);
         this.width = width;
         this.height = height;
-        this.speed = speed;
-        this.dir = dir;
     }
     is_colliding(point)
     {
-        let x_max = this.x + this.width;
-        let x_min = this.x;
-        let y_max = this.y + this.height;
-        let y_min = this.y;
+        let x_max = this.pos.x + this.width;
+        let x_min = this.pos.x;
+        let y_max = this.pos.y + this.height;
+        let y_min = this.pos.y;
         if(point.x < x_max && point.x > x_min && point.y < y_max && point.y > y_min)
         {
             return true;
         }
         return false;
     }
-    move(time)
-    {
-        this.x += this.speed * this.dir.x * time;
-        this.y += this.speed * this.dir.y * time;
-    }
     array()
     {
         let arr = new Float32Array(4);
-        arr[0] = this.x;
-        arr[1] = this.y;
+        arr[0] = this.pos.x;
+        arr[1] = this.pos.y;
         arr[2] = this.width;
         arr[3] = this.height;
         return arr;
