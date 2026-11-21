@@ -55,7 +55,7 @@ class Vector
 }
 class Player
 {
-    constructor(pos=new Vector(0,0,0),speed=0.2,dir=new Vector(1,0,0))
+    constructor(pos=new Vector(0,0,0),speed=0.4,dir=new Vector(1,0,0))
     {
         this.pos = pos;
         this.speed = speed;
@@ -165,11 +165,13 @@ function physics(time)
     if(keysPressed.has("KeyA"))
         player.dir = player.dir.sub(right);
     else if(keysPressed.has("KeyD"))
-        player.dir = player.dir.add(right);;
-    keysPressed = new Set();
+        player.dir = player.dir.add(right);
     player.dir.normalize();
 }
 window.addEventListener('keydown',(event) => {
     keysPressed.add(event.code);
+});
+window.addEventListener('keyup',(event) => {
+    keysPressed.delete(event.code);
 });
 init();
