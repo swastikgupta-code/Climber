@@ -8,7 +8,11 @@ struct Uniforms
     aspect: f32,
     time: f32,
     speed: vec2f,
-    pos: vec2f
+    pos: vec2f,
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32
 }
 @group(0) @binding(0) var<uniform> constants: Uniforms;
 @fragment

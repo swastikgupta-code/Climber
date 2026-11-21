@@ -1,4 +1,4 @@
-let device,context,pipeline,uniformBuffer,bindGroup,player,lastTime=0;
+let device,context,pipeline,uniformBuffer,bindGroup,player,lastTime=0,collider;
 var data = new Float32Array(16);
 var keysPressed = new Set();
 class Vector
@@ -87,6 +87,15 @@ class rectangle_collider
         }
         return false;
     }
+    array()
+    {
+        let arr = new Float32Array();
+        arr[0] = this.x;
+        arr[1] = this.y;
+        arr[2] = this.width;
+        arr[3] = this.height;
+        return arr;
+    }
 }
 async function init()
 {
@@ -98,6 +107,7 @@ async function init()
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     player = new Player();
+    collider = new rectangle_collider(-0.3,-0.3,0.6,0.2);
     context = canvas.getContext("webgpu");
     context.configure({
         device: device,
@@ -154,6 +164,7 @@ function render(time)
     data[3] = player.dir.mul(player.speed).y;
     data[4] = player.pos.x;
     data[5] = player.pos.y;
+    data.set(collider.array(),6);
     device.queue.writeBuffer(uniformBuffer,0,data);
     const commandEncoder = device.createCommandEncoder();
     const TextureView = context.getCurrentTexture().createView();
