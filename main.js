@@ -1,4 +1,5 @@
 let device,context,pipeline,uniformBuffer,bindGroup,player,lastTime=0;
+let r = 0.2;
 let gravity = 0.2;
 let colliders = [];
 var data = new Float32Array(32);
@@ -114,7 +115,7 @@ async function init()
     device = await adapter.requestDevice();
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    player = new Player();
+    player = new Player(new Vector(0,-0.9));
     create_environment();
     context = canvas.getContext("webgpu");
     context.configure({
@@ -206,11 +207,7 @@ function physics(time)
 {
     let right = new Vector(1,0);
     let up = new Vector(0,1);
-    let gap = 0.001+0.2;
-    if(keysPressed.has("KeyW"))
-        player.dir = player.dir.add(up);
-    else if(keysPressed.has("KeyS"))
-        player.dir = player.dir.sub(up);
+    let gap = 0.001+r;
     if(keysPressed.has("KeyA"))
         player.dir = player.dir.sub(right);
     else if(keysPressed.has("KeyD"))
@@ -219,10 +216,10 @@ function physics(time)
     colliders.forEach((collider)=>{
         if(collider.is_colliding(player.pos))
         {
-            let overlap_left = player.pos.x - collider.pos.x;
-            let overlap_right = (collider.pos.x+collider.width) - player.pos.x;
-            let overlap_down = player.pos.y - collider.pos.y;
-            let overlap_up = (collider.pos.y+collider.height) - player.pos.y;
+            let overlap_left = player.pos.x+r - collider.pos.x;
+            let overlap_right = (collider.pos.x+collider.width)+r - player.pos.x;
+            let overlap_down = player.pos.y - collider.pos.y+r;
+            let overlap_up = (collider.pos.y+collider.height) - player.pos.y+r;
             let min_overlap_x = Math.min(overlap_left,overlap_right);
             let min_overlap_y = Math.min(overlap_up,overlap_down);
             if(min_overlap_x < min_overlap_y)
@@ -254,9 +251,11 @@ function physics(time)
 }
 function create_environment()
 {
-    colliders.push(new rectangle_collider(-1.8,-1.1,3.6,0.2));
+    colliders.push(new rectangle_collider(-2.2,-1.1,4.4,0.2));
     colliders.push(new rectangle_collider(-1.8,-0.2,0.9,0.2));
     colliders.push(new rectangle_collider(0.6,-0.6,1.2,0.2));
+    colliders.push(new rectangle_collider(-2.3,-1.2,0.2,3.2));
+    colliders.push(new rectangle_collider(2.1,-1.2,0.2,3.2));
 }
 window.addEventListener('keydown',(event) => {
     keysPressed.add(event.code);

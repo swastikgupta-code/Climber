@@ -10,7 +10,7 @@ struct Uniforms
     speed: vec2f,
     pos: vec2f,
     padding : vec2f,
-    collider: array<vec4f,3>
+    collider: array<vec4f,5>
 }
 @group(0) @binding(0) var<uniform> constants: Uniforms;
 @fragment
@@ -28,7 +28,7 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4f
     {
          col = vec4f(1.0,1.0,0.0,1.0);
     }
-    for(var i = 0;i<3;i++)
+    for(var i = 0;i<5;i++)
     {
         let rect = constants.collider[i];
         if(uv.x>rect.x && uv.x<(rect.x+rect.z) && uv.y>rect.y && uv.y<(rect.y+rect.w))
