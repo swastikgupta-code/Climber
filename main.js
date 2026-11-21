@@ -1,4 +1,4 @@
-let device,context,pipeline,uniformBuffer,bindGroup;
+let device,context,pipeline,uniformBuffer,bindGroup,player;
 var data = new Float32Array(4);
 var speed = [0.2,0.0];
 var keysPressed = new Set();
@@ -25,6 +25,14 @@ class Vector
     {
         return new Vector(this.x-v.x,this.y-v.y,this.z-v.z);
     }
+    mul(s)
+    {
+        return new Vector(this.x*s,this.y*s,this.z*s);
+    }
+    div(s)
+    {
+        return new Vector(this.x/s,this.y/s,this.z/s);
+    }
     cross(v)
     {
         return new Vector(this.y*v.z-this.z*v.y,this.z*v.x-this.x*v.z,this.x*v.y-this.y*v.x);
@@ -32,14 +40,15 @@ class Vector
 }
 class Player
 {
-    constructor(pos=new Vector(0,0,0),speed=0.2)
+    constructor(pos=new Vector(0,0,0),speed=0.2,dir=new Vector(0,0,0))
     {
         this.pos = pos;
         this.speed = speed;
+        this.dir = dir
     }
     move(time)
     {
-        this.pos += this.speed*time;
+        this.pos = this.pos.add(this.dir.mul(this.speed*time));
     }
 }
 async function init()
@@ -51,6 +60,7 @@ async function init()
     device = await adapter.requestDevice();
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    player = new Player();
     context = canvas.getContext("webgpu");
     context.configure({
         device: device,
@@ -79,7 +89,7 @@ async function init()
         }
     });
     uniformBuffer = device.createBuffer({
-        size: 16,
+        size: 24,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
     });
     bindGroup = device.createBindGroup({
