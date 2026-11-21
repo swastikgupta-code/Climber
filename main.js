@@ -15,7 +15,7 @@ class Vector
     }
     dot(v)
     {
-        return this.x*v.x+this.y*v.y+this.z*v.z;
+        return (this.x*v.x+this.y*v.y+this.z*v.z);
     }
     add(v)
     {
@@ -28,6 +28,18 @@ class Vector
     cross(v)
     {
         return new Vector(this.y*v.z-this.z*v.y,this.z*v.x-this.x*v.z,this.x*v.y-this.y*v.x);
+    }
+}
+class Player
+{
+    constructor(pos=new Vector(0,0,0),speed=0.2)
+    {
+        this.pos = pos;
+        this.speed = speed;
+    }
+    move(time)
+    {
+        this.pos += this.speed*time;
     }
 }
 async function init()
