@@ -89,7 +89,7 @@ class rectangle_collider
     }
     array()
     {
-        let arr = new Float32Array();
+        let arr = new Float32Array(4);
         arr[0] = this.x;
         arr[1] = this.y;
         arr[2] = this.width;
