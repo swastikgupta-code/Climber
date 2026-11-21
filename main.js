@@ -1,5 +1,5 @@
 let device,context,pipeline,uniformBuffer,bindGroup,player,lastTime=0;
-var data = new Float32Array(8);
+var data = new Float32Array(16);
 var keysPressed = new Set();
 class Vector
 {
@@ -64,6 +64,28 @@ class Player
     move(time)
     {
         this.pos = this.pos.add(this.dir.mul(this.speed*time));
+    }
+}
+class rectangle_collider
+{
+    constructor(x,y,width,height)
+    {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+    is_colliding(point)
+    {
+        let x_max = this.x + this.width;
+        let x_min = this.x;
+        let y_max = this.y + this.height;
+        let y_min = this.y;
+        if(point.x < x_max && point.x > x_min && point.y < y_max && point.y > y_min)
+        {
+            return true;
+        }
+        return false;
     }
 }
 async function init()
