@@ -68,12 +68,14 @@ class Player
 }
 class rectangle_collider
 {
-    constructor(x,y,width,height)
+    constructor(x,y,width,height,speed=0.4,dir=new Vector(0,0,0))
     {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.speed = speed;
+        this.dir = dir;
     }
     is_colliding(point)
     {
@@ -86,6 +88,11 @@ class rectangle_collider
             return true;
         }
         return false;
+    }
+    move(time)
+    {
+        this.x += this.speed * this.dir.x * time;
+        this.y += this.speed * this.dir.y * time;
     }
     array()
     {
@@ -158,6 +165,7 @@ function render(time)
     const aspect = canvas.width/canvas.height;
     physics(delta_time);
     player.move(delta_time);
+    collider.move(delta_time);
     data[0] = aspect;
     data[1] = delta_time;
     data[2] = player.dir.mul(player.speed).x;
@@ -200,6 +208,11 @@ function physics(time)
     else if(keysPressed.has("KeyD"))
         player.dir = player.dir.add(right);
     player.dir.normalize();
+    if(collider.is_colliding(player.pos))
+    {
+        collider.dir = collider.dir.sub(up);
+        collider.dir.normalize();
+    }
 }
 window.addEventListener('keydown',(event) => {
     keysPressed.add(event.code);
