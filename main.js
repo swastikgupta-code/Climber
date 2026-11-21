@@ -2,6 +2,34 @@ let device,context,pipeline,uniformBuffer,bindGroup;
 var data = new Float32Array(4);
 var speed = [0.2,0.0];
 var keysPressed = new Set();
+class Vector
+{
+    constructor(x=0,y=0,z=0) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+    len()
+    {
+        return Math.sqrt(this.x**2+this.y**2+this.z**2);
+    }
+    dot(v)
+    {
+        return this.x*v.x+this.y*v.y+this.z*v.z;
+    }
+    add(v)
+    {
+        return new Vector(this.x+v.x,this.y+v.y,this.z+v.z);
+    }
+    sub(v)
+    {
+        return new Vector(this.x-v.x,this.y-v.y,this.z-v.z);
+    }
+    cross(v)
+    {
+        return new Vector(this.y*v.z-this.z*v.y,this.z*v.x-this.x*v.z,this.x*v.y-this.y*v.x);
+    }
+}
 async function init()
 {
     const canvas = document.getElementById("gpu_canvas");
