@@ -162,7 +162,6 @@ function render(time)
     let delta_time = time-lastTime;
     const canvas = context.canvas;
     const aspect = canvas.width/canvas.height;
-    physics(delta_time);
     player.move(delta_time);
     collider.move(delta_time);
     data[0] = aspect;
@@ -192,12 +191,14 @@ function render(time)
     passEncoder.end();
     device.queue.submit([commandEncoder.finish()]);
     lastTime = time;
+    physics(delta_time);
     requestAnimationFrame(render);
 }
 function physics(time)
 {
     let right = new Vector(1,0);
     let up = new Vector(0,1);
+    let gap = 0.001;
     if(keysPressed.has("KeyW"))
         player.dir = player.dir.add(up);
     else if(keysPressed.has("KeyS"))
@@ -209,13 +210,34 @@ function physics(time)
     player.dir.normalize();
     if(collider.is_colliding(player.pos))
     {
-        let width = 0.01;
-        if(player.pos.x>collider.pos.x+width || player.pos.x<collider.pos.x+collider.width-width)
+        let overlap_left = player.pos.x - collider.pos.x;
+        let overlap_right = (collider.pos.x+collider.width) - player.pos.x;
+        let overlap_down = player.pos.y - collider.pos.y;
+        let overlap_up = (collider.pos.y+collider.height) - player.pos.y;
+        let min_overlap_x = Math.min(overlap_left,overlap_right);
+        let min_overlap_y = Math.min(overlap_up,overlap_down);
+        if(min_overlap_x < min_overlap_y)
         {
+            if(overlap_left<overlap_right)
+            {
+                player.pos.x = collider.pos.x - gap;
+            }
+            else
+            {
+                player.pos.x = collider.pos.x + collider.width + gap;
+            }
             player.dir.x *= -1;
         }
-        if(player.pos.y>collider.pos.y+width || player.pos.y<collider.pos.y+collider.height-width)
+        else
         {
+            if(overlap_down<overlap_up)
+            {
+                player.pos.y = collider.pos.y - gap;
+            }
+            else
+            {
+                player.pos.y = collider.pos.y + collider.height + gap;
+            }
             player.dir.y *= -1;
         }
     }
