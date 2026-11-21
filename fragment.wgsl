@@ -24,6 +24,10 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4f
     {
         col = vec4f(1.0,0.0,0.0,1.0);
     }
+    else if(dis<0.21)
+    {
+         col = vec4f(1.0,1.0,0.0,1.0);
+    }
     for(var i = 0;i<3;i++)
     {
         let rect = constants.collider[i];

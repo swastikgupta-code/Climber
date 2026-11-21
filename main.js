@@ -89,7 +89,7 @@ class rectangle_collider extends Entity
         let x_min = this.pos.x;
         let y_max = this.pos.y + this.height;
         let y_min = this.pos.y;
-        if(point.x < x_max && point.x > x_min && point.y < y_max && point.y > y_min)
+        if(point.x < x_max+0.2 && point.x > x_min-0.2 && point.y < y_max+0.2 && point.y > y_min-0.2)
         {
             return true;
         }
@@ -206,7 +206,7 @@ function physics(time)
 {
     let right = new Vector(1,0);
     let up = new Vector(0,1);
-    let gap = 0.001;
+    let gap = 0.001+0.2;
     if(keysPressed.has("KeyW"))
         player.dir = player.dir.add(up);
     else if(keysPressed.has("KeyS"))
