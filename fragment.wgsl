@@ -14,7 +14,7 @@ struct Uniforms
 @fragment
 fn fragment_main(input: VertexOutput) -> @location(0) vec4f
 {
-    var cen : vec2f = constants.pos+constants.time*constants.speed;
+    var cen : vec2f = constants.pos;
     var dis = length(vec2f(input.uv.x*constants.aspect,input.uv.y)-cen);
     var col : vec4f = vec4f();
     if(dis<0.5)

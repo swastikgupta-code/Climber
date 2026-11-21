@@ -127,7 +127,7 @@ function render(time)
     physics(delta_time);
     player.move(delta_time);
     data[0] = aspect;
-    data[1] = delta_time * 0.001;
+    data[1] = delta_time;
     data[2] = player.dir.mul(player.speed).x;
     data[3] = player.dir.mul(player.speed).y;
     data[4] = player.pos.x;
@@ -159,13 +159,13 @@ function physics(time)
     let right = new Vector(1,0);
     let up = new Vector(0,1);
     if(keysPressed.has("KeyW"))
-        player.dir = player.dir.add(right);
+        player.dir = player.dir.add(up);
     else if(keysPressed.has("KeyS"))
-        player.dir = player.dir.sub(right);
-    if(keysPressed.has("KeyA"))
         player.dir = player.dir.sub(up);
+    if(keysPressed.has("KeyA"))
+        player.dir = player.dir.sub(right);
     else if(keysPressed.has("KeyD"))
-        player.dir = player.dir.add(up);;
+        player.dir = player.dir.add(right);;
     keysPressed = new Set();
     player.dir.normalize();
 }
