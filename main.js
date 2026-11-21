@@ -209,8 +209,15 @@ function physics(time)
     player.dir.normalize();
     if(collider.is_colliding(player.pos))
     {
-        collider.dir = collider.dir.sub(up);
-        collider.dir.normalize();
+        let width = 0.01;
+        if(player.pos.x>collider.pos.x+width || player.pos.x<collider.pos.x+collider.width-width)
+        {
+            player.dir.x *= -1;
+        }
+        if(player.pos.y>collider.pos.y+width || player.pos.y<collider.pos.y+collider.height-width)
+        {
+            player.dir.y *= -1;
+        }
     }
 }
 window.addEventListener('keydown',(event) => {
