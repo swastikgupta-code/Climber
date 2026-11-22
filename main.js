@@ -2,6 +2,7 @@ let device,context,pipeline,uniformBuffer,bindGroup,player,lastTime=0;
 let r = 0.2;
 let gravity = 0.2;
 let fixed_point = null;
+let can_control = true;
 let heights = [];
 let colliders = [];
 var data = new Float32Array(32);
@@ -211,10 +212,13 @@ function physics(time)
     let right = new Vector(1,0);
     let up = new Vector(0,1);
     let gap = 0.001+r;
-    if(keysPressed.has("KeyA"))
-        player.dir = player.dir.sub(right);
-    else if(keysPressed.has("KeyD"))
-        player.dir = player.dir.add(right);
+    if(can_control)
+    {
+        if(keysPressed.has("KeyA"))
+            player.dir = player.dir.sub(right);
+        else if(keysPressed.has("KeyD"))
+            player.dir = player.dir.add(right);
+    }
     if(keysPressed.has("Space"))
     {
         add_heights(player.pos.x);
@@ -229,7 +233,7 @@ function physics(time)
         }
         if(closest_y==-100)
             keysPressed.delete("Space");
-        else
+        else if(fixed_point == null)
         {
             fixed_point = new Vector(player.pos.x,closest_y);
         }
@@ -293,12 +297,17 @@ function add_heights(player_x)
 }
 window.addEventListener('keydown',(event) => {
     keysPressed.add(event.code);
+    if(event.code=="Space")
+    {
+        can_control=false;
+    }
 });
 window.addEventListener('keyup',(event) => {
     keysPressed.delete(event.code);
     if(event.code=="Space")
     {
         fixed_point=null;
+        can_control=true;
     }
 });
 init();
