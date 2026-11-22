@@ -296,5 +296,9 @@ window.addEventListener('keydown',(event) => {
 });
 window.addEventListener('keyup',(event) => {
     keysPressed.delete(event.code);
+    if(event.code=="Space")
+    {
+        fixed_point=null;
+    }
 });
 init();
