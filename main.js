@@ -266,6 +266,7 @@ function physics(time)
     colliders.forEach((collider)=>{
         if(collider.is_colliding(player.pos))
         {
+            let elasticity = 0.6;
             let overlap_left = player.pos.x+r - collider.pos.x;
             let overlap_right = (collider.pos.x+collider.width)+r - player.pos.x;
             let overlap_down = player.pos.y - collider.pos.y+r;
@@ -282,7 +283,7 @@ function physics(time)
                 {
                     player.pos.x = collider.pos.x + collider.width + gap;
                 }
-                player.vel.x *= -1;
+                player.vel.x *= -elasticity;
             }
             else
             {
@@ -294,7 +295,9 @@ function physics(time)
                 {
                     player.pos.y = collider.pos.y + collider.height + gap;
                 }
-                player.vel.y *= -1;
+                player.vel.y *= -elasticity;
+                if(Math.abs(player.vel.y)<0.08)
+                    player.vel.y = 0;
             }
         }
     });
@@ -302,8 +305,8 @@ function physics(time)
 function create_environment()
 {
     colliders.push(new rectangle_collider(-2.2,-1.1,4.4,0.2));
-    colliders.push(new rectangle_collider(-2.3,-1.2,0.2,3.2));
-    colliders.push(new rectangle_collider(2.1,-1.2,0.2,3.2));
+    colliders.push(new rectangle_collider(-2.3,-1.2,0.2,150.2));
+    colliders.push(new rectangle_collider(2.1,-1.2,0.2,150.2));
     for(let i =0;i<100;i++)
     {
         colliders.push(new rectangle_collider(Math.random()*3-1.8,i*0.6-0.6+Math.random()*0.4,0.4+Math.random()*0.8,0.1+Math.random()*0.2));
