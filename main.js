@@ -1,6 +1,8 @@
 let device,context,pipeline,uniformBuffer,bindGroup,player,lastTime=0;
 let r = 0.2;
 let gravity = 0.2;
+let fixed_point = null;
+let heights = [];
 let colliders = [];
 var data = new Float32Array(32);
 var keysPressed = new Set();
@@ -90,7 +92,7 @@ class rectangle_collider extends Entity
         let x_min = this.pos.x;
         let y_max = this.pos.y + this.height;
         let y_min = this.pos.y;
-        if(point.x < x_max+0.2 && point.x > x_min-0.2 && point.y < y_max+0.2 && point.y > y_min-0.2)
+        if(point.x < x_max+r && point.x > x_min-r && point.y < y_max+r && point.y > y_min-r)
         {
             return true;
         }
@@ -117,6 +119,7 @@ async function init()
     canvas.height = window.innerHeight;
     player = new Player(new Vector(0,-0.9));
     create_environment();
+    add_heights();
     context = canvas.getContext("webgpu");
     context.configure({
         device: device,
@@ -212,6 +215,22 @@ function physics(time)
         player.dir = player.dir.sub(right);
     else if(keysPressed.has("KeyD"))
         player.dir = player.dir.add(right);
+    if(keysPressed.has("Space"))
+    {
+        let closest_y = -100;
+        for(const height of heights)
+        {
+            if(height>player.pos.y)
+                closest_y = height;
+                break;
+        }
+        if(closest_y==-100)
+            keysPressed.delete("Space");
+        else
+        {
+            fixed_point = new Vector(player.pos.x,closest_y);
+        }
+    }
     player.dir.normalize();
     colliders.forEach((collider)=>{
         if(collider.is_colliding(player.pos))
@@ -256,6 +275,16 @@ function create_environment()
     colliders.push(new rectangle_collider(0.6,-0.6,1.2,0.2));
     colliders.push(new rectangle_collider(-2.3,-1.2,0.2,3.2));
     colliders.push(new rectangle_collider(2.1,-1.2,0.2,3.2));
+}
+function add_heights()
+{
+    colliders.forEach((collider,index)=>{
+        if(!heights.includes(collider.height))
+        {
+            heights.push(collider.height);
+        }
+    });
+    heights.sort((a,b)=>a-b);
 }
 window.addEventListener('keydown',(event) => {
     keysPressed.add(event.code);
