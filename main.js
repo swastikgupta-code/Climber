@@ -178,11 +178,12 @@ function render(time)
     data[3] = player.dir.mul(player.speed).y;
     data[4] = player.pos.x;
     data[5] = player.pos.y;
-    data[6] = 0.0;
-    data[7] = 0.0;
+    data[6] = fixed_point?.x ?? 0.0;
+    data[7] = fixed_point?.y ?? 0.0;
     colliders.forEach((collider,index)=>{
         data.set(collider.array(),8+index*4);
     });
+    data[8+colliders.length*4] = fixed_point != null ? 1 : 0;
     device.queue.writeBuffer(uniformBuffer,0,data);
     const commandEncoder = device.createCommandEncoder();
     const TextureView = context.getCurrentTexture().createView();
@@ -221,8 +222,10 @@ function physics(time)
         for(const height of heights)
         {
             if(height>player.pos.y)
+            {
                 closest_y = height;
                 break;
+            }
         }
         if(closest_y==-100)
             keysPressed.delete("Space");
@@ -279,9 +282,9 @@ function create_environment()
 function add_heights()
 {
     colliders.forEach((collider,index)=>{
-        if(!heights.includes(collider.height))
+        if(!heights.includes(collider.pos.y))
         {
-            heights.push(collider.height);
+            heights.push(collider.pos.y);
         }
     });
     heights.sort((a,b)=>a-b);
