@@ -119,7 +119,6 @@ async function init()
     canvas.height = window.innerHeight;
     player = new Player(new Vector(0,-0.9));
     create_environment();
-    add_heights();
     context = canvas.getContext("webgpu");
     context.configure({
         device: device,
@@ -218,6 +217,7 @@ function physics(time)
         player.dir = player.dir.add(right);
     if(keysPressed.has("Space"))
     {
+        add_heights(player.pos.x);
         let closest_y = -100;
         for(const height of heights)
         {
@@ -233,6 +233,7 @@ function physics(time)
         {
             fixed_point = new Vector(player.pos.x,closest_y);
         }
+        heights=[];
     }
     player.dir.normalize();
     colliders.forEach((collider)=>{
@@ -279,12 +280,13 @@ function create_environment()
     colliders.push(new rectangle_collider(-2.3,-1.2,0.2,3.2));
     colliders.push(new rectangle_collider(2.1,-1.2,0.2,3.2));
 }
-function add_heights()
+function add_heights(player_x)
 {
     colliders.forEach((collider,index)=>{
         if(!heights.includes(collider.pos.y))
         {
-            heights.push(collider.pos.y);
+            if(collider.pos.x<player_x && collider.pos.x + collider.width > player_x)
+                heights.push(collider.pos.y);
         }
     });
     heights.sort((a,b)=>a-b);
