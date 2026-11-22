@@ -6,7 +6,7 @@ let can_control = true;
 let rope_length = 0;
 let heights = [];
 let colliders = [];
-var data = new Float32Array(32);
+var data = new Float32Array(512);
 var keysPressed = new Set();
 class Vector
 {
@@ -241,7 +241,7 @@ function physics(time)
     }
     if(keysPressed.has("Space"))
     {
-        add_heights(player.pos.x);
+        add_heights(player.pos.x,player.pos.y);
         let closest_y = -100;
         for(const height of heights)
         {
@@ -302,17 +302,19 @@ function physics(time)
 function create_environment()
 {
     colliders.push(new rectangle_collider(-2.2,-1.1,4.4,0.2));
-    colliders.push(new rectangle_collider(-1.8,-0.2,0.9,0.2));
-    colliders.push(new rectangle_collider(0.6,-0.6,1.2,0.2));
     colliders.push(new rectangle_collider(-2.3,-1.2,0.2,3.2));
     colliders.push(new rectangle_collider(2.1,-1.2,0.2,3.2));
+    for(let i =0;i<100;i++)
+    {
+        colliders.push(new rectangle_collider(Math.random()*3-1.8,i*0.6-0.6+Math.random()*0.4,0.4+Math.random()*0.8,0.1+Math.random()*0.2));
+    }
 }
-function add_heights(player_x)
+function add_heights(player_x,player_y)
 {
     colliders.forEach((collider,index)=>{
         if(!heights.includes(collider.pos.y))
         {
-            if(collider.pos.x<player_x && collider.pos.x + collider.width > player_x)
+            if(collider.pos.x<player_x && collider.pos.x + collider.width > player_x && (collider.pos.y-player_y)<2)
                 heights.push(collider.pos.y);
         }
     });

@@ -10,7 +10,7 @@ struct Uniforms
     speed: vec2f,
     pos: vec2f,
     end_point : vec2f,
-    collider: array<vec4f,5>,
+    collider: array<vec4f,103>,
     has_end_point: f32
 }
 @group(0) @binding(0) var<uniform> constants: Uniforms;
@@ -19,6 +19,7 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4f
 {
     var uv: vec2f = vec2f(input.uv.x*constants.aspect,input.uv.y);
     var cen : vec2f = constants.pos;
+    uv.y += cen.y + 0.6;
     var dis = length(uv-cen);
     var col : vec4f = vec4f();
     if(dis<0.2)
@@ -29,7 +30,7 @@ fn fragment_main(input: VertexOutput) -> @location(0) vec4f
     {
          col = vec4f(1.0,1.0,0.0,1.0);
     }
-    for(var i = 0;i<5;i++)
+    for(var i = 0;i<103;i++)
     {
         let rect = constants.collider[i];
         if(uv.x>rect.x && uv.x<(rect.x+rect.z) && uv.y>rect.y && uv.y<(rect.y+rect.w))
