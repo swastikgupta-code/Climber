@@ -223,10 +223,21 @@ function physics(time)
     else if(fixed_point != null)
     {
         let diff = player.pos.sub(fixed_point);
-        let curr_diff = diff.len();
-        let normal = new Vector(diff.y,-diff.x);
-        normal.normalize();
-        //splayer.dir = normal;
+        let curr_dist = diff.len();
+        if(curr_dist>0.0001)
+        {
+            let rad_dir = diff.div(curr_dist);
+            if(curr_dist>rope_length)
+            {
+                player.pos = fixed_point.add(rad_dir.mul(rope_length));
+            }
+            let rad_speed = player.vel.dot(rad_dir);
+            if(rad_speed >0 || curr_dist>=rope_length)
+            {
+                let rad_vel = rad_dir.mul(rad_speed);
+                player.vel = player.vel.sub(rad_vel);
+            }
+        }
     }
     if(keysPressed.has("Space"))
     {
@@ -271,7 +282,7 @@ function physics(time)
                 {
                     player.pos.x = collider.pos.x + collider.width + gap;
                 }
-                player.vec.x *= -1;
+                player.vel.x *= -1;
             }
             else
             {
@@ -283,7 +294,7 @@ function physics(time)
                 {
                     player.pos.y = collider.pos.y + collider.height + gap;
                 }
-                player.vec.y *= -1;
+                player.vel.y *= -1;
             }
         }
     });
