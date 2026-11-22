@@ -62,29 +62,28 @@ class Vector
 }
 class Entity
 {
-    constructor(pos=new Vector(0,0,0),speed=0.4,dir=new Vector(1,0,0))
+    constructor(pos=new Vector(0,0,0),vel=new Vector(0.4,0,0))
     {
         this.pos = pos;
-        this.speed = speed;
-        this.dir = dir
+        this.vel = vel;
     }
     move(time)
     {
-        this.pos = this.pos.add(this.dir.mul(this.speed*time));
+        this.pos = this.pos.add(this.vel.mul(time));
     }
 }
 class Player extends Entity
 {
-    constructor(pos=new Vector(0,0,0),speed=0.4,dir=new Vector(1,0,0))
+    constructor(pos=new Vector(0,0,0),vel=new Vector(0.4,0,0))
     {
-        super(pos,speed,dir);
+        super(pos,vel);
     }
 }
 class rectangle_collider extends Entity
 {
-    constructor(x,y,width,height,speed=0.4,dir=new Vector(0,0,0))
+    constructor(x,y,width,height,vel=new Vector(0,0,0))
     {
-        super(new Vector(x,y),speed,dir);
+        super(new Vector(x,y),vel);
         this.width = width;
         this.height = height;
     }
@@ -175,8 +174,8 @@ function render(time)
     });
     data[0] = aspect;
     data[1] = delta_time;
-    data[2] = player.dir.mul(player.speed).x;
-    data[3] = player.dir.mul(player.speed).y;
+    data[2] = player.vel.x;
+    data[3] = player.vel.y;
     data[4] = player.pos.x;
     data[5] = player.pos.y;
     data[6] = fixed_point?.x ?? 0.0;
@@ -211,21 +210,23 @@ function render(time)
 function physics(time)
 {
     let right = new Vector(1,0);
-    let up = new Vector(0,1);
+    let movespeed = 0.8;
     let gap = 0.001+r;
+    player.vel.y -= gravity*time;
     if(can_control)
     {
         if(keysPressed.has("KeyA"))
-            player.dir = player.dir.sub(right);
+            player.vel.x = -movespeed;
         else if(keysPressed.has("KeyD"))
-            player.dir = player.dir.add(right);
+            player.vel.x = movespeed;
     }
     else if(fixed_point != null)
     {
         let diff = player.pos.sub(fixed_point);
+        let curr_diff = diff.len();
         let normal = new Vector(diff.y,-diff.x);
         normal.normalize();
-        player.dir = normal;
+        //splayer.dir = normal;
     }
     if(keysPressed.has("Space"))
     {
@@ -240,7 +241,10 @@ function physics(time)
             }
         }
         if(closest_y==-100)
+        {
+            can_control=true;
             keysPressed.delete("Space");
+        }
         else if(fixed_point == null)
         {
             fixed_point = new Vector(player.pos.x,closest_y);
@@ -248,7 +252,6 @@ function physics(time)
         }
         heights=[];
     }
-    player.dir.normalize();
     colliders.forEach((collider)=>{
         if(collider.is_colliding(player.pos))
         {
@@ -268,7 +271,7 @@ function physics(time)
                 {
                     player.pos.x = collider.pos.x + collider.width + gap;
                 }
-                player.dir.x *= -1;
+                player.vec.x *= -1;
             }
             else
             {
@@ -280,7 +283,7 @@ function physics(time)
                 {
                     player.pos.y = collider.pos.y + collider.height + gap;
                 }
-                player.dir.y *= -1;
+                player.vec.y *= -1;
             }
         }
     });
