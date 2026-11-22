@@ -3,6 +3,7 @@ let r = 0.2;
 let gravity = 0.2;
 let fixed_point = null;
 let can_control = true;
+let rope_length = 0;
 let heights = [];
 let colliders = [];
 var data = new Float32Array(32);
@@ -219,6 +220,13 @@ function physics(time)
         else if(keysPressed.has("KeyD"))
             player.dir = player.dir.add(right);
     }
+    else if(fixed_point != null)
+    {
+        let diff = player.pos.sub(fixed_point);
+        let normal = new Vector(diff.y,-diff.x);
+        normal.normalize();
+        player.dir = normal;
+    }
     if(keysPressed.has("Space"))
     {
         add_heights(player.pos.x);
@@ -236,6 +244,7 @@ function physics(time)
         else if(fixed_point == null)
         {
             fixed_point = new Vector(player.pos.x,closest_y);
+            rope_length = closest_y-player.pos.y;
         }
         heights=[];
     }
@@ -308,6 +317,7 @@ window.addEventListener('keyup',(event) => {
     {
         fixed_point=null;
         can_control=true;
+        rope_length=0;
     }
 });
 init();
